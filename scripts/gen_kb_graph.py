@@ -432,7 +432,7 @@ main{display:flex;flex:1;min-height:0}
 /* ---------- 节点档案卡片 ---------- */
 .node{position:absolute;left:0;top:0;width:186px;will-change:transform}
 .node.s-reference{width:168px}
-.node .in{transform:translate(-50%,-50%);background:var(--card);border:1.5px solid var(--ink);
+.node .in{position:relative;transform:translate(-50%,-50%);background:var(--card);border:1.5px solid var(--ink);
   padding:8px 10px 9px;cursor:pointer;box-shadow:3px 3px 0 rgba(22,21,15,.13);transition:box-shadow .15s}
 .node .in:hover{box-shadow:5px 5px 0 rgba(22,21,15,.2)}
 .n-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;
@@ -452,17 +452,31 @@ main{display:flex;flex:1;min-height:0}
 .node.s-superseded .n-sum{border-left-color:var(--gray);color:#9A9585}
 .node.s-superseded .in:hover{box-shadow:none}
 .node.sel .in{border-color:var(--red);box-shadow:5px 5px 0 var(--red)}
+.node.hub .in{border-color:var(--red);border-style:double;border-width:3.5px}
 .node.dim{opacity:.13}
+.n-badge{position:absolute;top:-11px;right:-11px;background:var(--red);color:#fff;
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.05em;
+  padding:1px 7px;border:1.5px solid var(--paper);cursor:pointer;z-index:3}
+.n-badge:hover{background:var(--ink)}
 #graphView.far .n-sum,#graphView.far .n-meta{display:none}
 #graphView.far .node .in{padding:6px 8px}
 
 /* ---------- 图例 ---------- */
 #legend{position:absolute;left:16px;bottom:14px;font-family:var(--mono);font-size:10.5px;color:var(--muted);
-  background:var(--card);border:1.5px solid var(--ink);padding:8px 12px;line-height:2;max-width:370px;
+  background:var(--card);border:1.5px solid var(--ink);padding:8px 12px;line-height:2;max-width:380px;
   box-shadow:3px 3px 0 rgba(22,21,15,.12)}
 #legend i{display:inline-block;width:20px;height:0;border-top:2.5px solid;margin-right:5px;vertical-align:3px}
 #legend .sq{display:inline-block;width:9px;height:9px;border:1.5px solid var(--ink);margin-right:5px;vertical-align:-1px}
 #legend .sqg{border-style:dashed;border-color:var(--gray);background:#ECE9DF}
+#legend .sqr{border-color:var(--red);background:var(--red)}
+
+/* ---------- 缩放控制 ---------- */
+#zoombtns{position:absolute;right:16px;bottom:14px;display:flex;flex-direction:column;gap:6px;align-items:stretch}
+#zoombtns button{width:38px;height:32px;border:1.5px solid var(--ink);background:var(--card);
+  font-family:var(--mono);font-size:12.5px;font-weight:700;cursor:pointer;box-shadow:2px 2px 0 rgba(22,21,15,.13);padding:0}
+#zoombtns button:hover{background:var(--ink);color:var(--paper)}
+#zoombtns .pct{height:auto;border:0;box-shadow:none;background:transparent;color:var(--muted);font-size:9.5px;font-weight:400;cursor:default}
+#zoombtns .pct:hover{background:transparent;color:var(--muted)}
 
 /* ---------- 详情面板 ---------- */
 #detail{width:362px;border-left:1.5px solid var(--ink);background:var(--card);overflow:auto;padding:20px;display:none;flex-shrink:0}
@@ -480,6 +494,10 @@ main{display:flex;flex:1;min-height:0}
 .jump{color:var(--ink);cursor:pointer;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .jump:hover{color:var(--red)}
 .dim{color:var(--muted)}
+.d-btn{display:block;width:100%;margin-top:16px;padding:7px 10px;border:1.5px solid var(--ink);
+  background:#FBF3D9;font-family:var(--mono);font-size:11.5px;font-weight:700;letter-spacing:.12em;
+  cursor:pointer;box-shadow:3px 3px 0 rgba(22,21,15,.15);text-transform:uppercase}
+.d-btn:hover{background:var(--red);color:#fff;border-color:var(--red)}
 #detail .src{margin-top:16px;font-family:var(--mono);font-size:12px}
 #detail .close{float:right;cursor:pointer;color:var(--muted);font-size:19px;line-height:1}
 #detail .close:hover{color:var(--red)}
@@ -524,8 +542,16 @@ footer{padding:8px 24px;font-family:var(--mono);font-size:10.5px;color:var(--mut
     <div id="nodeLayer"></div>
     <div id="legend">
       <div><i style="border-color:#E63329"></i>取代（演进）　<i style="border-color:#2545D3"></i>相关　<i style="border-color:#C7C2B2;border-top-style:dashed"></i>引用</div>
-      <div><span class="sq"></span>active / reference　<span class="sq sqg"></span>superseded（已取代）　卡片随关联增多而增大</div>
-      <div>滚轮缩放 · 拖空白平移 · 拖卡片调整 · 单击看档案 · 双击打开源文件</div>
+      <div><span class="sq"></span>active / reference　<span class="sq sqg"></span>superseded（已取代）　<span class="sq sqr"></span>+N 收起的关联卡片</div>
+      <div>滚轮 / 右下 ± 缩放 · 拖空白平移 · 拖卡片调整 · 单击看档案</div>
+      <div>档案面板「收起关联」折叠子图谱，点红色 +N 角标重新展开 · 双击打开源文件</div>
+    </div>
+    <div id="zoombtns">
+      <button id="zin" title="放大">＋</button>
+      <button id="zout" title="缩小">－</button>
+      <button id="zfit" title="适配全图" style="font-size:10px">FIT</button>
+      <button id="z100" title="实际大小" style="font-size:10px">1:1</button>
+      <button class="pct" id="zoomPct">100%</button>
     </div>
   </div>
   <div id="tableView" style="display:none"></div>
@@ -537,13 +563,15 @@ footer{padding:8px 24px;font-family:var(--mono);font-size:10.5px;color:var(--mut
 const D=KB_DATA, nodes=D.nodes, edges=D.edges, NS="http://www.w3.org/2000/svg";
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const byId={};
-nodes.forEach((n,i)=>{n.i=i;n.deg=0;n.fx=null;n.hide=false;
-  n.x=600+470*Math.cos(i*2.399);n.y=400+380*Math.sin(i*2.399);n.vx=0;n.vy=0;byId[n.id]=n;});
+nodes.forEach((n,i)=>{n.i=i;n.deg=0;n.fx=null;n.hideF=false;n.hideC=false;
+  const R=88*Math.sqrt(i+1),a=i*2.39996;
+  n.x=640+R*Math.cos(a);n.y=430+R*0.72*Math.sin(a);n.vx=0;n.vy=0;byId[n.id]=n;});
 edges.forEach(e=>{const a=byId[e.from],b=byId[e.to];if(a&&b){a.deg++;b.deg++;}});
 const domains=[...new Set(nodes.flatMap(n=>n.dom&&n.dom.length?n.dom:["未分类"]))];
 const PALETTE=["#E63329","#2545D3","#0E8A5F","#F2B90D","#7C3AED","#DB2777","#0891B2","#F97316","#65A30D","#64748B"];
 const colOf=d=>PALETTE[((domains.indexOf(d)%PALETTE.length)+PALETTE.length)%PALETTE.length];
 const primDom=n=>(n.dom&&n.dom.length)?n.dom[0]:"未分类";
+const isVisible=n=>!n.hideF&&!n.hideC;
 
 document.getElementById("stats").textContent=
   `docs ${nodes.length} · edges ${edges.length} · active ${nodes.filter(n=>n.s==="active").length} · superseded ${nodes.filter(n=>n.s==="superseded").length} · reference ${nodes.filter(n=>n.s==="reference").length} · domains ${domains.length}`;
@@ -578,64 +606,109 @@ nodes.forEach(n=>{
     ${n.b?`<div class="n-sum">${esc(n.b)}</div>`:""}
   </div>`;
   nodeLayer.appendChild(el);nodeEls.push(el);});
+/* 量卡片实际尺寸，供碰撞检测使用 */
+nodes.forEach((n,i)=>{const el=nodeEls[i];n.w=el.offsetWidth||186;n.h=el.offsetHeight||78;});
 
-/* ---------- 力导向（为大卡片调校） ---------- */
-let alpha=1;
+/* ---------- 物理引擎：斥力 + 弹簧 + AABB 碰撞解决 ---------- */
+const PADV=14;           /* 卡片之间的最小间隙 */
+let alpha=1,settleDone=false;
+function resolveCollisions(iters){
+  const N=nodes.length;let fixed=0;
+  for(let it=0;it<iters;it++){
+    for(let i=0;i<N;i++){const a=nodes[i];
+      for(let j=i+1;j<N;j++){const b=nodes[j];
+        if(a.hideC||a.hideF||b.hideC||b.hideF)continue;
+        const dx=b.x-a.x;
+        const ox=(a.w+b.w)/2+PADV-Math.abs(dx);
+        if(ox<=0)continue;
+        const dy=b.y-a.y;
+        const oy=(a.h+b.h)/2+PADV-Math.abs(dy);
+        if(oy<=0)continue;
+        fixed++;
+        if(ox<oy){
+          const nx=dx>=0?1:-1,push=ox/2+.5;
+          if(a.fx!=null)b.x+=nx*2*push;else if(b.fx!=null)a.x-=nx*2*push;else{a.x-=nx*push;b.x+=nx*push;}
+          const rv=(b.vx-a.vx)*nx;
+          if(rv<0){const jj=rv/2;a.vx+=nx*jj;b.vx-=nx*jj;}
+        }else{
+          const ny=dy>=0?1:-1,push=oy/2+.5;
+          if(a.fy!=null)b.y+=ny*2*push;else if(b.fy!=null)a.y-=ny*2*push;else{a.y-=ny*push;b.y+=ny*push;}
+          const rv=(b.vy-a.vy)*ny;
+          if(rv<0){const jj=rv/2;a.vy+=ny*jj;b.vy-=ny*jj;}
+        }
+      }}}
+  return fixed;
+}
 function step(){
   const N=nodes.length;
   for(let i=0;i<N;i++){const a=nodes[i];
     for(let j=i+1;j<N;j++){const b=nodes[j];
+      if(a.hideC||a.hideF||b.hideC||b.hideF)continue;
       let dx=a.x-b.x,dy=a.y-b.y,d2=dx*dx+dy*dy;
-      if(d2>102400)continue;if(d2<1)d2=1;
-      const d=Math.sqrt(d2);
-      let f=26000*alpha/d2;
-      if(d<210)f+=(210-d)*0.028;         /* 卡片最小间距 */
-      const fx=dx/d*f,fy=dy/d*f;
+      if(d2>250000)continue;if(d2<100)d2=100;
+      const d=Math.sqrt(d2),f=Math.min((26000+d2*8)*alpha/d2,50),fx=dx/d*f,fy=dy/d*f;
       a.vx+=fx;a.vy+=fy;b.vx-=fx;b.vy-=fy;}}
   edges.forEach(e=>{const a=byId[e.from],b=byId[e.to];if(!a||!b)return;
+    if(a.hideC||a.hideF||b.hideC||b.hideF)return;
     const dx=b.x-a.x,dy=b.y-a.y,d=Math.sqrt(dx*dx+dy*dy)||1;
-    const rest=e.type==="references"?255:(e.type==="related"?220:200),f=(d-rest)*0.004;
+    const rest=e.type==="references"?265:(e.type==="related"?230:205),f=(d-rest)*0.003*(0.15+0.85*Math.min(1,alpha*2));
     const fx=dx/d*f,fy=dy/d*f;
     a.vx+=fx;a.vy+=fy;b.vx-=fx;b.vy-=fy;});
   nodes.forEach(n=>{
-    n.vx+=(600-n.x)*0.0008;n.vy+=(400-n.y)*0.0008;
+    if(n.hideC||n.hideF)return;
+    n.vx+=(640-n.x)*0.0006;n.vy+=(430-n.y)*0.0006;
     if(n.fx!=null){n.x=n.fx;n.y=n.fy;n.vx=n.vy=0;}
-    else{n.vx*=0.85;n.vy*=0.85;n.x+=n.vx;n.y+=n.vy;}});
+    else{n.vx*=0.82;n.vy*=0.82;
+      const sp=Math.hypot(n.vx,n.vy);
+      if(sp>15){n.vx*=15/sp;n.vy*=15/sp;}
+      n.x+=n.vx;n.y+=n.vy;}});
+  resolveCollisions(2);
 }
 alpha=1;
-for(let k=0;k<300;k++){step();alpha*=0.972;}
+for(let k=0;k<350;k++){step();alpha*=0.972;}
+for(let g=0;g<150&&resolveCollisions(1)>0;g++);
 
 /* ---------- 渲染与视图变换 ---------- */
 let scale=1,tx=0,ty=0;
 const graphView=document.getElementById("graphView");
+const zoomPct=document.getElementById("zoomPct");
 function render(){
   edgeEls.forEach(ln=>{const a=nodes[ln.dataset.a],b=nodes[ln.dataset.b];
-    if(a.hide||b.hide){ln.style.display="none";return;}ln.style.display="";
+    if(!isVisible(a)||!isVisible(b)){ln.style.display="none";return;}ln.style.display="";
     ln.setAttribute("x1",a.x);ln.setAttribute("y1",a.y);
     ln.setAttribute("x2",b.x);ln.setAttribute("y2",b.y);});
   nodeEls.forEach((el,i)=>{const n=nodes[i];
-    el.style.display=n.hide?"none":"";
+    el.style.display=isVisible(n)?"":"none";
     el.style.transform="translate("+(n.x*scale+tx)+"px,"+(n.y*scale+ty)+"px)";});
   vp.setAttribute("transform","translate("+tx+","+ty+") scale("+scale+")");
   graphView.classList.toggle("far",scale<0.45);
+  zoomPct.textContent=Math.round(scale*100)+"%";
 }
 function fit(){
-  const xs=nodes.map(n=>n.x),ys=nodes.map(n=>n.y);
-  const x0=Math.min(...xs)-160,x1=Math.max(...xs)+160,y0=Math.min(...ys)-120,y1=Math.max(...ys)+120;
+  const vis=nodes.filter(isVisible);
+  if(!vis.length)return;
+  const xs=vis.map(n=>n.x),ys=vis.map(n=>n.y);
+  const x0=Math.min(...xs)-170,x1=Math.max(...xs)+170,y0=Math.min(...ys)-130,y1=Math.max(...ys)+130;
   const r=graphView.getBoundingClientRect();
   scale=Math.min(r.width/(x1-x0),r.height/(y1-y0),1.35);
   tx=(r.width-(x0+x1)*scale)/2;ty=(r.height-(y0+y1)*scale)/2;render();
 }
+function zoomAt(k,cx,cy){
+  const ns=Math.min(3.2,Math.max(0.06,scale*k)),r=ns/scale;
+  tx=cx-(cx-tx)*r;ty=cy-(cy-ty)*r;scale=ns;render();}
 svg.addEventListener("wheel",ev=>{ev.preventDefault();
-  const k=ev.deltaY<0?1.12:1/1.12,ns=Math.min(3.2,Math.max(0.06,scale*k)),r=ns/scale;
-  const b=graphView.getBoundingClientRect(),mx=ev.clientX-b.left,my=ev.clientY-b.top;
-  tx=mx-(mx-tx)*r;ty=my-(my-ty)*r;scale=ns;render();},{passive:false});
+  const b=graphView.getBoundingClientRect();
+  zoomAt(ev.deltaY<0?1.12:1/1.12,ev.clientX-b.left,ev.clientY-b.top);},{passive:false});
+document.getElementById("zin").onclick=()=>{const b=graphView.getBoundingClientRect();zoomAt(1.25,b.width/2,b.height/2);};
+document.getElementById("zout").onclick=()=>{const b=graphView.getBoundingClientRect();zoomAt(1/1.25,b.width/2,b.height/2);};
+document.getElementById("zfit").onclick=()=>fit();
+document.getElementById("z100").onclick=()=>{const b=graphView.getBoundingClientRect();zoomAt(1/scale,b.width/2,b.height/2);};
 let drag=null,downXY=null;
 graphView.addEventListener("mousedown",ev=>{
+  if(ev.target.closest("#zoombtns")||ev.target.closest("#legend"))return;
   const el=ev.target.closest?ev.target.closest(".node"):null;
   downXY=[ev.clientX,ev.clientY];
   if(el){drag={n:nodes[+el.dataset.i]};}
-  else if(ev.target.closest("#legend"))return;
   else drag={pan:true,sx:ev.clientX,sy:ev.clientY,tx0:tx,ty0:ty};
   ev.preventDefault();});
 window.addEventListener("mousemove",ev=>{if(!drag)return;
@@ -653,17 +726,54 @@ graphView.addEventListener("dblclick",ev=>{
   const el=ev.target.closest?ev.target.closest(".node"):null;
   if(el){const n=nodes[+el.dataset.i];window.open("../"+encodeURIComponent(n.id),"__blank");}});
 
+/* ---------- 子图谱收起 / 展开 ---------- */
+const collapsedBy=new Map();   /* hubId -> Set(被收起的节点 id) */
+function neighborsOf(n){const s=new Set();
+  edges.forEach(e=>{if(e.from===n.id)s.add(e.to);if(e.to===n.id)s.add(e.from);});return s;}
+function refreshHub(hub){
+  const el=nodeEls[hub.i],cnt=collapsedBy.has(hub.id)?collapsedBy.get(hub.id).size:0;
+  el.classList.toggle("hub",cnt>0);
+  const old=el.querySelector(".n-badge");if(old)old.remove();
+  if(cnt>0){
+    const b=document.createElement("span");b.className="n-badge";b.textContent="+"+cnt;
+    b.title="点击展开收起的关联";
+    b.addEventListener("click",ev=>{ev.stopPropagation();expand(hub);});
+    el.querySelector(".in").appendChild(b);}
+}
+function collapse(hub){
+  if(collapsedBy.has(hub.id))return;
+  const ids=[...neighborsOf(hub)].filter(id=>isVisible(byId[id]));
+  if(!ids.length)return;
+  collapsedBy.set(hub.id,new Set(ids));
+  ids.forEach(id=>{byId[id].hideC=true;});
+  refreshHub(hub);
+  if(selected&&selected.hideC){selected=hub;nodeEls.forEach(el=>el.classList.remove("sel","dim"));select(hub);}
+  else if(selected===hub)showDetail(hub);
+  alpha=Math.max(alpha,0.6);
+}
+function expand(hub){
+  const ids=collapsedBy.get(hub.id);
+  if(!ids)return;
+  collapsedBy.delete(hub.id);
+  ids.forEach(id=>{
+    let stillHidden=false;
+    collapsedBy.forEach(set=>{if(set.has(id))stillHidden=true;});
+    byId[id].hideC=stillHidden;});
+  refreshHub(hub);
+  if(selected===hub)showDetail(hub);
+  alpha=Math.max(alpha,0.6);
+}
+
 /* ---------- 选择与档案详情 ---------- */
 const detail=document.getElementById("detail");
 let selected=null;
-function neighborsOf(n){const s=new Set();
-  edges.forEach(e=>{if(e.from===n.id)s.add(e.to);if(e.to===n.id)s.add(e.from);});return s;}
 function select(n){selected=n;
   const nb=neighborsOf(n);
   nodes.forEach(m=>{const el=nodeEls[m.i];
+    if(!isVisible(m)){el.classList.remove("sel","dim");return;}
     el.classList.toggle("sel",m===n);el.classList.toggle("dim",m!==n&&!nb.has(m.id));});
   edgeEls.forEach(ln=>{const a=nodes[ln.dataset.a],b=nodes[ln.dataset.b];
-    ln.style.opacity=(a===n||b===n)?1:0.05;});
+    ln.style.opacity=(isVisible(a)&&isVisible(b)&&(a===n||b===n))?1:0.05;});
   showDetail(n);}
 function clearSel(){selected=null;
   nodeEls.forEach(el=>el.classList.remove("sel","dim"));
@@ -671,9 +781,11 @@ function clearSel(){selected=null;
   detail.style.display="none";}
 function centerOn(n){const b=graphView.getBoundingClientRect();
   tx=b.width/2-n.x*scale;ty=b.height/2-n.y*scale;render();}
-function jumps(sel){document.querySelectorAll(sel).forEach(a=>a.addEventListener("click",ev=>{
-  ev.preventDefault();const n=byId[a.dataset.id];if(!n)return;
-  document.getElementById("btnGraph").click();select(n);centerOn(n);}));}
+function jumps(sel){document.querySelectorAll(sel).forEach(a=>{
+  if(a.dataset.bound)return;a.dataset.bound="1";
+  a.addEventListener("click",ev=>{
+    ev.preventDefault();const n=byId[a.dataset.id];if(!n)return;
+    document.getElementById("btnGraph").click();select(n);centerOn(n);});});}
 function relHtml(n,type,label){
   const out=[];
   edges.forEach(e=>{
@@ -686,8 +798,14 @@ function relHtml(n,type,label){
       (note?`<span class="dim">（${esc(note)}）</span>`:"")).join("、")+"</span></div>";}
 function showDetail(n){
   detail.style.display="block";
+  const isCollapsed=collapsedBy.has(n.id);
+  const nbrCount=[...neighborsOf(n)].filter(id=>isVisible(byId[id])).length;
   const cur=(n.cur&&n.cur!==n.id&&byId[n.cur])?
     `<div class="d-row"><span class="d-lab">current 现行版</span><span><a class="jump" data-id="${esc(n.cur)}">${esc(byId[n.cur].t)}</a></span></div>`:"";
+  const btn=(nbrCount>0||isCollapsed)?
+    `<button class="d-btn" id="d-collapse">${isCollapsed
+      ?`expand 展开关联（${collapsedBy.get(n.id).size}）`
+      :`collapse 收起关联（${nbrCount}）`}</button>`:"";
   detail.innerHTML=`<span class="close" title="关闭">×</span>
     <div class="kicker">NODE FILE · 节点档案</div>
     <h3>${esc(n.t||n.id)}</h3>
@@ -699,8 +817,12 @@ function showDetail(n){
     ${n.c?`<div class="d-concl"><span class="lab">CONCLUSION · 结论</span>${esc(n.c)}</div>`:""}
     ${cur}${relHtml(n,"supersedes","supersedes 取代")}
     ${relHtml(n,"related","related 相关")}${relHtml(n,"references","references 引用")}
+    ${btn}
     <div class="src"><a class="jump" href="../${encodeURIComponent(n.id)}" target="_blank">打开源文件 OPEN ↗</a></div>`;
-  detail.querySelector(".close").onclick=clearSel;jumps("#detail .jump");}
+  detail.querySelector(".close").onclick=clearSel;
+  const db=detail.querySelector("#d-collapse");
+  if(db)db.onclick=()=>{isCollapsed?expand(n):collapse(n);};
+  jumps("#detail .jump");}
 
 /* ---------- 筛选与搜索 ---------- */
 const state={q:"",domains:new Set(domains),statuses:new Set(["active","superseded","reference"])};
@@ -720,10 +842,9 @@ function applyFilter(){
   nodes.forEach(n=>{
     const hay=((n.t||"")+" "+(n.c||"")+" "+(n.b||"")+" "+n.id).toLowerCase();
     const domOK=(n.dom&&n.dom.length?n.dom:["未分类"]).some(d=>state.domains.has(d));
-    n.hide=!(state.statuses.has(n.s)&&domOK&&(state.q===""||hay.includes(state.q)));
-    nodeEls[n.i].classList.toggle("dim",!n.hide&&!!selected&&selected!==n&&!neighborsOf(selected).has(n.id));
-    if(n.hide&&selected===n)clearSel();});
-  if(selected&&selected.hide)clearSel();
+    n.hideF=!(state.statuses.has(n.s)&&domOK&&(state.q===""||hay.includes(state.q)));});
+  if(selected&&!isVisible(selected))clearSel();
+  else if(selected)select(selected);
   render();if(document.getElementById("tableView").style.display!=="none")renderTable();}
 
 /* ---------- 清单视图 ---------- */
@@ -736,7 +857,7 @@ function rows(list,withCur){
     <td>${esc(n.c)||`<span class="dim">${esc(n.b||"")}</span>`}</td>
     ${withCur?`<td>${n.cur&&n.cur!==n.id?`<a class="jump" data-id="${esc(n.cur)}">${esc(byId[n.cur].t)}</a>`:'<span class="dim">—</span>'}</td>`:""}</tr>`).join("");}
 function renderTable(){
-  const vis=nodes.filter(n=>!n.hide);
+  const vis=nodes.filter(isVisible);
   const byDate=(a,b)=>String(b.d||"").localeCompare(String(a.d||""));
   const dec=vis.filter(n=>n.s!=="reference").sort(byDate);
   const all=vis.slice().sort(byDate);
@@ -754,7 +875,10 @@ btnT.onclick=()=>{btnT.classList.add("on");btnG.classList.remove("on");
   graphView.style.display="none";
   tableView.style.display="block";renderTable();};
 
-(function loop(){if(alpha>0.003){step();alpha*=0.99;}render();requestAnimationFrame(loop);})();
+(function loop(){
+  if(alpha>0.003){step();alpha*=0.99;
+    if(alpha<=0.003&&!settleDone){settleDone=true;for(let g=0;g<150&&resolveCollisions(1)>0;g++);}}
+  render();requestAnimationFrame(loop);})();
 fit();
 </script>
 </body>

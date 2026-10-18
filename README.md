@@ -11,7 +11,7 @@
 - **Metadata layer** — drafts frontmatter for every doc: date, domain, status (`active / superseded / reference`), one-line conclusion.
 - **Three relation types** — `supersedes` (evolution), `related` (semantic), `[[wikilinks]]` (citations), forming a time-aware graph of how your thinking evolved.
 - **Rebuildable distilled layer** — decision registry, per-domain adjacency, machine-readable JSON, and a health report (missing metadata / broken links). Everything regenerates in seconds.
-- **Single-file HTML atlas** — Swiss-archive styled interactive page: force graph with card nodes (title + one-line meaning), search, filters, detail panel, table view. No CDN, works offline.
+- **Single-file HTML atlas** — Swiss-archive styled interactive page: force graph with card nodes (title + one-line meaning) that are guaranteed non-overlapping, zoom controls, search, filters, collapse/expand of subgraphs around any hub, detail panel, table view. No CDN, works offline.
 
 | Node file · node detail | Table view |
 |---|---|
