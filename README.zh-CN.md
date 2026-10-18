@@ -20,8 +20,10 @@
 ## 安装
 
 ```bash
-git clone <本仓库> ~/.agents/skills/personal-knowledge-graph
+git clone https://github.com/loletranga/Personal-Knowledge-Graph.git ~/.agents/skills/personal-knowledge-graph
 ```
+
+> 注意保留末尾的目标目录名：技能目录名必须与 `SKILL.md` 中的 `name` 字段一致（`personal-knowledge-graph`），否则不会被正确发现。
 
 支持 SKILL.md 的 Agent（ZCode、Claude Code 等）会自动发现并加载。
 

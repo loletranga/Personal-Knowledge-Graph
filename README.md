@@ -20,8 +20,10 @@
 ## Install
 
 ```bash
-git clone <this-repo> ~/.agents/skills/personal-knowledge-graph
+git clone https://github.com/loletranga/Personal-Knowledge-Graph.git ~/.agents/skills/personal-knowledge-graph
 ```
+
+> The target folder name matters: it must match the skill `name` in `SKILL.md` (`personal-knowledge-graph`), so keep the destination path as-is.
 
 Any agent that discovers `SKILL.md` (ZCode, Claude Code, …) will pick it up automatically.
 
